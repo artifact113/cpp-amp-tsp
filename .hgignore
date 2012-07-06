@@ -1,2 +1,11 @@
+# use glob syntax.
 syntax: glob
-tpslib_parser/Debug/vc110.pdb
+
+# output and temp files
+bin/
+*/obj/
+
+# vs solution files
+*.user
+*.sdf
+*.suo
