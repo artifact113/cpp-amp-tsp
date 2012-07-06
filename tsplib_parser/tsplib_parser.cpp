@@ -1,9 +1,10 @@
 #include <iostream>
 #include <fstream>
 
-#include "tsplib_parser.hpp"
+#include "tsplib_parser/tsplib_parser.hpp"
+#include "tsp/adjacency_matrix.hpp"
 
-UNNAMED_NAMESPACE_BEGIN
+namespace {
 
 template <typename weight_type> struct valid_edge_weight_type;
 template <> struct valid_edge_weight_type<int>   { static const std::string value() { return "EUC_2D"; }};
@@ -59,13 +60,16 @@ bool parse_coordinates_tag(std::ifstream& ifs, const std::string& tag, const std
 {
     if (tag.find(key) != std::string::npos)
     {
-        // dummy data
-        int id;
-
         for (int i = 0; i < dimension; i++)
         {
+            // read coord data
             coord_type c;
-            ifs >> id >> c.x >> c.y;
+            ifs >> c.id >> c.x >> c.y;
+
+            // zero indexing
+            c.id--; 
+
+            // store
             data[i] = c;
         }
 
@@ -79,9 +83,9 @@ bool parse_coordinates_tag(std::ifstream& ifs, const std::string& tag, const std
     }
 }
 
-UNNAMED_NAMESPACE_END
+} // namespace 
 
-TSPLIB_PARSER_NAMESPACE_BEGIN
+namespace tpslib {
 
 template <typename weight_type>
 tsplib_data<weight_type>::tsplib_data(const std::string& file_name)
@@ -136,6 +140,36 @@ tsplib_data<weight_type>::tsplib_data(const std::string& file_name)
     
 }
 
+template <typename weight_type>
+std::unique_ptr<tsp::adjacency_matrix<weight_type>> tsplib_data<weight_type>::generate_adjacency_matrix() const
+{
+    auto ret = std::unique_ptr<tsp::adjacency_matrix<weight_type>>(new tsp::adjacency_matrix<weight_type>(dimension_));  
+
+    for (const coord_type& src : coordinates_)
+    {
+        for (const coord_type& dst : coordinates_)
+        {
+            // symmetric data
+            if (type_ == "TSP")
+            {
+                // skip self and symmetric data
+                if (src.id >= dst.id)
+                    continue;
+
+                // caclulate symmetric distance
+                weight_type dist = distance(src, dst);
+
+                // symmetric data
+                ret->operator()(src.id, dst.id) = dist;
+                ret->operator()(dst.id, src.id) = dist;
+            }
+            
+        }
+    }
+
+    return ret;
+}
+
 /*
 template <typename weight_type>
 std::vector<weight_type> tsplib_data<weight_type>::generate_symmetric_input_matrix() const
@@ -165,4 +199,4 @@ std::vector<weight_type> tsplib_data<weight_type>::generate_symmetric_input_matr
 template class tsplib_data<int>;
 template class tsplib_data<float>;
 
-TSPLIB_PARSER_NAMESPACE_END
+} // namespace tpslib

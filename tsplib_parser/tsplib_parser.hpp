@@ -4,19 +4,17 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <memory>
 
-#define TSPLIB_PARSER_NAMESPACE_BEGIN namespace tsplib_parser {
-#define TSPLIB_PARSER_NAMESPACE_END } // namespace  tsp
+#include "tsp/forward.hpp"
 
-#define UNNAMED_NAMESPACE_BEGIN namespace {
-#define UNNAMED_NAMESPACE_END } // namespace  tsp
-
-TSPLIB_PARSER_NAMESPACE_BEGIN
+namespace tpslib {
 
 /// DESC
 template <typename weight_type>
 struct coord
 {
+    int id;
     weight_type x;
     weight_type y;
 };
@@ -39,8 +37,8 @@ public:
     // ctor
     tsplib_data(const std::string& file_name);
 
-    // generates the 2 matrix
-    //std::vector<weight_type> generate_symmetric_input_matrix() const;
+    // generates the an adjacey matrix from the data
+    std::unique_ptr<tsp::adjacency_matrix<weight_type>> generate_adjacency_matrix() const;
 
     // get problem dimension 
     int dimension() const
@@ -59,6 +57,6 @@ private:
     std::vector<coord_type> coordinates_;
 };
 
-TSPLIB_PARSER_NAMESPACE_END
+} // namespace tpslib 
 
 #endif // __TSPLIB_PARSER_HPP__
