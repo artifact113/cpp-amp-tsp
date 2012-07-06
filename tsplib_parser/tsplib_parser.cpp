@@ -163,37 +163,11 @@ std::unique_ptr<tsp::adjacency_matrix<weight_type>> tsplib_data<weight_type>::ge
                 ret->operator()(src.id, dst.id) = dist;
                 ret->operator()(dst.id, src.id) = dist;
             }
-            
         }
     }
 
     return ret;
 }
-
-/*
-template <typename weight_type>
-std::vector<weight_type> tsplib_data<weight_type>::generate_symmetric_input_matrix() const
-{
-    std::vector<weight_type> distanceMatrix(dimension * dimension, weight_type());
-
-    for (const coord& src : coordinates)
-    {
-        for (const coord& dst : coordinates)
-        {
-            // skip self and symmetric data
-            if (src.id >= dst.id)
-                continue;
-
-            // caclulate symmetric distance
-            weight_type d = src.distance(dst);
-            distanceMatrix[(src.id-1) * dimension + (dst.id-1)] = d;
-            distanceMatrix[(dst.id-1) * dimension + (src.id-1)] = d;
-        }
-    }
-
-    return distanceMatrix;
-}
-*/
 
 // Template Instantiations
 template class tsplib_data<int>;

@@ -8,10 +8,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tps_test", "tsp_test\tps_te
 		{D849DF4A-1969-414C-85F4-27D4D0A040A3} = {D849DF4A-1969-414C-85F4-27D4D0A040A3}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tsplib_parser", "tpslib_parser\tpslib_parser.vcxproj", "{4F47C283-09DE-452E-9CB5-CB489E60D3A3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D849DF4A-1969-414C-85F4-27D4D0A040A3} = {D849DF4A-1969-414C-85F4-27D4D0A040A3}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tpslib_parser", "tsplib_parser\tpslib_parser.vcxproj", "{4F47C283-09DE-452E-9CB5-CB489E60D3A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

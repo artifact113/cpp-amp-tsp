@@ -9,6 +9,18 @@ adjacency_matrix<weight_type>::adjacency_matrix(int dimension)
 }
 
 template <typename weight_type>
+adjacency_matrix<weight_type>::adjacency_matrix(const std::vector<weight_type>& mat)
+    : dimension_(mat.size()), data_(mat)
+{
+}
+
+template <typename weight_type>
+int adjacency_matrix<weight_type>::dimension() const
+{
+    return dimension_;
+}
+
+template <typename weight_type>
 weight_type& adjacency_matrix<weight_type>::operator()(int src, int dst)
 {
     return data_[src*dimension_+dst];

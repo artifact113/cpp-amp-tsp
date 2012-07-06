@@ -6,7 +6,7 @@
 #include <string>
 #include <memory>
 
-#include "tsp/forward.hpp"
+#include "tsp/adjacency_matrix.hpp"
 
 namespace tpslib {
 

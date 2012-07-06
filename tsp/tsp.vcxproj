@@ -12,11 +12,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="adjacency_matrix.hpp" />
-    <ClInclude Include="forward.hpp" />
+    <ClInclude Include=".\tour.hpp" />
+    <ClInclude Include=".\solve.hpp" />
+    <ClInclude Include=".\ant_colony.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="adjacency_matrix.cpp" />
-    <ClCompile Include="tsp.cpp" />
+    <ClCompile Include=".\solve.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and '$(VisualStudioVersion)' == ''">$(VCTargetsPath11)</VCTargetsPath>

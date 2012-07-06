@@ -14,7 +14,7 @@
     <ClCompile Include="driver.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\tpslib_parser\tpslib_parser.vcxproj">
+    <ProjectReference Include="..\tsplib_parser\tpslib_parser.vcxproj">
       <Project>{4f47c283-09de-452e-9cb5-cb489e60d3a3}</Project>
     </ProjectReference>
     <ProjectReference Include="..\tsp\tsp.vcxproj">

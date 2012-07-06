@@ -3,24 +3,24 @@
 
 #include <vector>
 
-#include "forward.hpp"
-
 namespace tsp {
 
 template <typename weight_type>
 class adjacency_matrix
 {
 public:
-
     // ctor
     adjacency_matrix(int dimension);
 
+    // std::vector<int>
+    adjacency_matrix(const std::vector<weight_type>& mat);
+
     // accessors
+    int dimension() const;
     const weight_type& operator()(int src, int dst) const;
     weight_type& operator()(int src, int dst);
     
 private:
-
     int dimension_;
     std::vector<weight_type> data_;
 };
