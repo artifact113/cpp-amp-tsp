@@ -35,12 +35,11 @@ template <typename weight_type>
 tour solve(const adjacency_matrix<weight_type>& adjacency_matrix)
 {
     int stops = adjacency_matrix.dimension();
-    tour best_tour(stops);
-
-    const int ants = 500;
+   
+    const int ants = 100;
     ant_colony<weight_type> ac(adjacency_matrix, ants);
 
-    return best_tour;
+    return ac.run();
 }
 
 // template instantiations

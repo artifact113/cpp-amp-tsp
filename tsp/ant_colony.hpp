@@ -210,41 +210,47 @@ class ant_colony
 {
 public:
     ant_colony(const adjacency_matrix<weight_type>& adjacency_matrix, int ant_count)
-        : adjacency_matrix_(adjacency_matrix), pheromone_trails_(adjacency_matrix.dimension())
+        : adjacency_matrix_(adjacency_matrix), ant_count_(ant_count), pheromone_trails_(adjacency_matrix.dimension())
     {
-        const int MAX_STEPS = 500;
-        for (int STEP = 0; STEP < MAX_STEPS; STEP++) 
+    }
+
+    tour run()
+    {
+
+        std::vector<tour> ant_tours;
+
+        // generate ant trails
+        for (int i = 0; i < ant_count_; i++)
+            ant_tours.push_back( ant_.visit(adjacency_matrix_, pheromone_trails_) );
+
+        // update the pheromone trails
+        for (const tour& tour : ant_tours)
         {
-            std::vector<tour> ant_tours;
-
-            // generate ant trails
-            for (int i = 0; i < ant_count; i++)
-                ant_tours.push_back( ant_.visit(adjacency_matrix_, pheromone_trails_) );
-
-            // update the pheromone trails
-            for (const tour& tour : ant_tours)
-            {
-                pheromone_trails_.update(tour);
-            }
-
-            // evaporate
-            pheromone_trails_.evaporate(0.5f);
-
-            // calculate output
-            std::vector<weight_type> tour_distances;
-            std::for_each(ant_tours.begin(), ant_tours.end(), [&](const tour& tour)
-            {
-                tour_distances.push_back(calculate_distance(adjacency_matrix, tour));
-            }); 
-
-            // save best
-            auto it = std::min_element(tour_distances.begin(), tour_distances.end());
-            std::cout << "Min: " << *it << std::endl;
+            pheromone_trails_.update(tour);
         }
+
+        // evaporate
+        pheromone_trails_.evaporate(0.5f);
+
+        // calculate output
+        std::vector<weight_type> tour_distances;
+        std::for_each(ant_tours.begin(), ant_tours.end(), [&](const tour& tour)
+        {
+            tour_distances.push_back(calculate_distance(adjacency_matrix_, tour));
+        }); 
+
+        // save best
+        auto it = std::min_element(tour_distances.begin(), tour_distances.end());
+        std::cout << "Min: " << *it << std::endl;
+
+        // TMP
+        return ant_tours[0];
+
     }
 
 private:
     const adjacency_matrix<weight_type>& adjacency_matrix_;
+    int ant_count_;
     pheromone_trails<weight_type> pheromone_trails_;
 
     ant ant_;

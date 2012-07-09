@@ -8,4 +8,5 @@ bin/
 # vs solution files
 *.user
 *.sdf
+*.opensdf
 *.suo
