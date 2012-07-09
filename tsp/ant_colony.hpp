@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <functional>
+#include <iostream> // temp
 
 #include "adjacency_matrix.hpp"
 
@@ -37,27 +38,43 @@ public:
         : dimension_(dimension), mat_(dimension*dimension, init)
     {}
 
+    // getter
     const weight_type& operator()(int src, int dst) const
     {
         return mat_[src*dimension_ + dst];
     }
 
-    // add pheromone to an edge
-    void add(int src, int dst, weight_type& value)
+    // update with a tour
+    void update(const tour& tour)
     {
-        mat_[src*dimension_ + dst] += value;
+        for (int i = 0; i < dimension_-1; i++)
+        {
+            int src = tour(i);
+            int dst = tour(i+1);
+
+            add(src, dst, weight_type(1));
+        }
     }
 
     // evaporate a percentage from each edge
     void evaporate(float rate)
     {
         assert(rate >= 0.f && rate <= 1.f); 
-        std::for_each( mat_.begin(), mat_.end(), [](weight_type& p){ p*= rate; })
+        std::for_each(mat_.begin(), mat_.end(), [&](weight_type& p)
+        { 
+            p = weight_type(float(p) * rate); 
+        });
     }
 
 private:
     int dimension_;
     std::vector<weight_type> mat_;
+
+    // add pheromone to an edge
+    void add(int src, int dst, weight_type value)
+    {
+        mat_[src*dimension_ + dst] += value;
+    }
 };
 
 //
@@ -67,8 +84,8 @@ private:
 template <typename weight_type>
 struct heuristic
 {
-    static const float default_distance_weight()  { return 0.45f; }
-    static const float default_pheromone_weight() { return 0.50f; }
+    static const float default_distance_weight()  { return 0.80f; }
+    static const float default_pheromone_weight() { return 0.15f; }
     static const float default_random_weight()    { return 0.05f; }
 
     // core values
@@ -89,11 +106,13 @@ struct heuristic
         weight += default_distance_weight() * (1.f - float(distance) / float(max_distance));
 
         // add pheromone component
-        weight += default_pheromone_weight() * (1.f - float(pheromone) / float(max_pheromone));
+        if (max_pheromone && pheromone) 
+            weight += default_pheromone_weight() * (float(pheromone) / float(max_pheromone));
 
         // add random component
         weight += default_random_weight() * random;
 
+        assert( weight <= 1.0 );
     }
 };
 
@@ -106,18 +125,18 @@ class ant
 public:
 
     template <typename weight_type>
-    std::unique_ptr<tour> visit(const adjacency_matrix<weight_type>& adjacency_matrix, const pheromone_trails<weight_type>& pheromone_trails)
+    tour visit(const adjacency_matrix<weight_type>& adjacency_matrix, const pheromone_trails<weight_type>& pheromone_trails)
     {
         // create tour
         int tour_size = adjacency_matrix.dimension();
-        std::unique_ptr<tour> this_tour = std::unique_ptr<tour>(new tour(tour_size));
+        tour this_tour(tour_size);
 
         // randomize starting point
         std::uniform_int_distribution<int> int_dist(0, tour_size-1);
         std::uniform_real_distribution<float> float_dist(0, 1);
 
         int src = int_dist(get_rng_engine());
-        this_tour->add_stop(src);
+        this_tour.add_stop(src);
 
         // inialize valid location list
         std::list<int> tabu;
@@ -140,7 +159,7 @@ public:
             std::transform(tabu.begin(), tabu.end(), heuristics.begin(), [&](const int& dst)
             {
                 heuristic_type h;
-                int src = this_tour->current_location();
+                int src = this_tour.current_location();
 
                 // calcuate distance componet
                 h.distance = adjacency_matrix(src, dst);
@@ -158,7 +177,7 @@ public:
             weight_type max_distance = std::max_element(heuristics.begin(), heuristics.end(), [](const heuristic_pair& lhs, const heuristic_pair& rhs){ return lhs.second.distance < rhs.second.distance; } )->second.distance;
 
             // find maximum pheromone to normalize pheromone componet
-            weight_type max_pheromone = std::max_element(heuristics.begin(), heuristics.end(), [](const heuristic_pair& lhs, const heuristic_pair& rhs){ return lhs.second.pheromone < rhs.second.pheromone; } )->second.distance;
+            weight_type max_pheromone = std::max_element(heuristics.begin(), heuristics.end(), [](const heuristic_pair& lhs, const heuristic_pair& rhs){ return lhs.second.pheromone < rhs.second.pheromone; } )->second.pheromone;
     
             // calculate hueristics weights
             std::vector<float> hueristics_weights;
@@ -171,7 +190,7 @@ public:
             int max_hueristic = std::max_element(heuristics.begin(), heuristics.end(), [](const heuristic_pair& lhs, const heuristic_pair& rhs){ return lhs.second.weight < rhs.second.weight; } )->first;
 
             // add to our tour
-            this_tour->add_stop(max_hueristic);
+            this_tour.add_stop(max_hueristic);
 
             // remove stop from the valid list
             tabu.remove(max_hueristic);
@@ -193,11 +212,35 @@ public:
     ant_colony(const adjacency_matrix<weight_type>& adjacency_matrix, int ant_count)
         : adjacency_matrix_(adjacency_matrix), pheromone_trails_(adjacency_matrix.dimension())
     {
-        std::vector<std::unique_ptr<tour>> ant_tours;
+        const int MAX_STEPS = 500;
+        for (int STEP = 0; STEP < MAX_STEPS; STEP++) 
+        {
+            std::vector<tour> ant_tours;
 
-        // generate ant trails
-        for (int i = 0; i < ant_count; i++)
-            ant_tours.push_back( ant_.visit(adjacency_matrix_, pheromone_trails_) );
+            // generate ant trails
+            for (int i = 0; i < ant_count; i++)
+                ant_tours.push_back( ant_.visit(adjacency_matrix_, pheromone_trails_) );
+
+            // update the pheromone trails
+            for (const tour& tour : ant_tours)
+            {
+                pheromone_trails_.update(tour);
+            }
+
+            // evaporate
+            pheromone_trails_.evaporate(0.5f);
+
+            // calculate output
+            std::vector<weight_type> tour_distances;
+            std::for_each(ant_tours.begin(), ant_tours.end(), [&](const tour& tour)
+            {
+                tour_distances.push_back(calculate_distance(adjacency_matrix, tour));
+            }); 
+
+            // save best
+            auto it = std::min_element(tour_distances.begin(), tour_distances.end());
+            std::cout << "Min: " << *it << std::endl;
+        }
     }
 
 private:

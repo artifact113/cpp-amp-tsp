@@ -4,12 +4,15 @@
 #include "tsp/adjacency_matrix.hpp"
 #include "tsp/solve.hpp"
 
+#include "tsp_visualization/visualization.hpp"
+
 int main()
 {
     try
     {
         // read data
         tpslib::tsplib_data<int> data("st70.tsp");
+        viz::display<int> output(data);
 
         // get symmetrix adjacency matrix
         auto adjaceny_matrix = data.generate_adjacency_matrix();

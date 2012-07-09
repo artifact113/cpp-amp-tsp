@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <algorithm>
 
 #include "tsp/adjacency_matrix.hpp"
 
@@ -44,6 +45,29 @@ public:
     int dimension() const
     {
         return dimension_;
+    }
+
+    // coord access
+    int points() const 
+    { 
+        return coordinates_.size(); 
+    }
+
+    const coord_type& operator()(int i) const 
+    { 
+        return coordinates_[i];
+    }
+
+    int max_x() const 
+    { 
+        auto it = std::max_element(coordinates_.begin(), coordinates_.end(), [](const coord_type& rhs, const coord_type& lhs){ return rhs.x < lhs.x; });
+        return int(std::ceil(it->x));
+    }
+
+    int max_y() const 
+    { 
+        auto it = std::max_element(coordinates_.begin(), coordinates_.end(), [](const coord_type& rhs, const coord_type& lhs){ return rhs.y < lhs.y; });
+        return int(std::ceil(it->y));
     }
 
 private:

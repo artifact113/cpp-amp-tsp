@@ -28,6 +28,11 @@ public:
         return data_.back();
     }
 
+    const int& operator()(int i) const
+    {
+        return data_[i];
+    }
+
 private:
     std::vector<int> data_;    
 };

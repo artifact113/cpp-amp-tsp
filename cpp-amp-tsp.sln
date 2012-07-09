@@ -3,12 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tsp", "tsp\tsp.vcxproj", "{D849DF4A-1969-414C-85F4-27D4D0A040A3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tps_test", "tsp_test\tps_test.vcxproj", "{9ECDEBEF-732C-4E76-8027-8854CEE00900}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tsp_test", "tsp_test\tps_test.vcxproj", "{9ECDEBEF-732C-4E76-8027-8854CEE00900}"
 	ProjectSection(ProjectDependencies) = postProject
+		{B6F041F9-B482-4092-8B9B-4B9880F76208} = {B6F041F9-B482-4092-8B9B-4B9880F76208}
 		{D849DF4A-1969-414C-85F4-27D4D0A040A3} = {D849DF4A-1969-414C-85F4-27D4D0A040A3}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tpslib_parser", "tsplib_parser\tpslib_parser.vcxproj", "{4F47C283-09DE-452E-9CB5-CB489E60D3A3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tsp_visualization", "tsp_visualization\tsp_visualization.vcxproj", "{B6F041F9-B482-4092-8B9B-4B9880F76208}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +27,10 @@ Global
 		{9ECDEBEF-732C-4E76-8027-8854CEE00900}.Debug|Win32.Build.0 = Debug|Win32
 		{9ECDEBEF-732C-4E76-8027-8854CEE00900}.Release|Win32.ActiveCfg = Release|Win32
 		{9ECDEBEF-732C-4E76-8027-8854CEE00900}.Release|Win32.Build.0 = Release|Win32
+		{B6F041F9-B482-4092-8B9B-4B9880F76208}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B6F041F9-B482-4092-8B9B-4B9880F76208}.Debug|Win32.Build.0 = Debug|Win32
+		{B6F041F9-B482-4092-8B9B-4B9880F76208}.Release|Win32.ActiveCfg = Release|Win32
+		{B6F041F9-B482-4092-8B9B-4B9880F76208}.Release|Win32.Build.0 = Release|Win32
 		{D849DF4A-1969-414C-85F4-27D4D0A040A3}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D849DF4A-1969-414C-85F4-27D4D0A040A3}.Debug|Win32.Build.0 = Debug|Win32
 		{D849DF4A-1969-414C-85F4-27D4D0A040A3}.Release|Win32.ActiveCfg = Release|Win32

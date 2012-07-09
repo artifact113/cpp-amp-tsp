@@ -10,7 +10,7 @@ template <typename weight_type>
 weight_type calculate_distance(const adjacency_matrix<weight_type>& adjacency_matrix, const tour& tour);
 
 template <typename weight_type>
-std::unique_ptr<tour> solve(const adjacency_matrix<weight_type>& adjacency_matrix);
+tour solve(const adjacency_matrix<weight_type>& adjacency_matrix);
 
 } // namespace tsp
 
