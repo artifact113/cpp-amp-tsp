@@ -22,11 +22,6 @@
     </ProjectReference>
     <ProjectReference Include="..\tsp_visualization\tsp_visualization.vcxproj">
       <Project>{b6f041f9-b482-4092-8b9b-4b9880f76208}</Project>
-      <Private>true</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">

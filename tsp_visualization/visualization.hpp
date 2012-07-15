@@ -4,23 +4,26 @@
 #include <memory>
 #include <string>
 
-#include "tsp/tour.hpp"
-#include "tsplib_parser/tsplib_parser.hpp"
+// fowards
+namespace tsp { class tour; }
+namespace tsp { class pheromones; }
+namespace tsplib { template <typename coord_type> class tsplib_data; }
 
 namespace viz {
 
-template <typename weight_type>
+template <typename coord_type>
 class display
 {
 public:
-    display(const tpslib::tsplib_data<weight_type>& input, int window_size = 640);
 
-    static const int border_size = 16;
+    // ctor
+    display(const tsplib::tsplib_data<coord_type>& input, int window_size = 860);
 
-    // 
+    // construction functions
     void clear();
     void draw_nodes();
     void draw_tour(const tsp::tour& tour);
+    void draw_trails(const tsp::pheromones& pheromones);
 
     // draw to screen
     void output_to_window(const std::string& name);

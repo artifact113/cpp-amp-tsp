@@ -9,7 +9,7 @@
 namespace tsp {
 
 template <typename weight_type>
-weight_type calculate_distance(const adjacency_matrix<weight_type>& adjacency_matrix, const tour& tour)
+weight_type solve<weight_type>::calculate_distance(const adjacency_matrix<weight_type>& adjacency_matrix, const tour& tour)
 {
     assert(adjacency_matrix.dimension() == tour.dimension());
 
@@ -31,20 +31,8 @@ weight_type calculate_distance(const adjacency_matrix<weight_type>& adjacency_ma
     return distance;
 }
 
-template <typename weight_type>
-tour solve(const adjacency_matrix<weight_type>& adjacency_matrix)
-{
-    int stops = adjacency_matrix.dimension();
-   
-    const int ants = 100;
-    ant_colony<weight_type> ac(adjacency_matrix, ants);
-
-    return ac.run();
-}
-
-// template instantiations
-template tour solve<int>(const adjacency_matrix<int>&);
-template tour solve<float>(const adjacency_matrix<float>&);
+template struct solve<int>;
+template struct solve<float>;
 
 }
 

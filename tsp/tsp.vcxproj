@@ -13,12 +13,17 @@
   <ItemGroup>
     <ClInclude Include="adjacency_matrix.hpp" />
     <ClInclude Include=".\tour.hpp" />
-    <ClInclude Include=".\solve.hpp" />
-    <ClInclude Include=".\ant_colony.hpp" />
+    <ClInclude Include=".\colony.hpp" />
+    <ClInclude Include=".\ant.hpp" />
+    <ClInclude Include="config.hpp" />
+    <ClInclude Include=".\pheromones.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="adjacency_matrix.cpp" />
-    <ClCompile Include=".\solve.cpp" />
+    <ClCompile Include=".\pheromones.cpp" />
+    <ClCompile Include="ant.cpp" />
+    <ClCompile Include="colony.cpp" />
+    <ClCompile Include="tour.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and '$(VisualStudioVersion)' == ''">$(VCTargetsPath11)</VCTargetsPath>

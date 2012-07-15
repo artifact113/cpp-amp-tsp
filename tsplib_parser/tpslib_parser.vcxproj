@@ -22,6 +22,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4F47C283-09DE-452E-9CB5-CB489E60D3A3}</ProjectGuid>
     <RootNamespace>tpslib_parser</RootNamespace>
+    <ProjectName>tsplib_parser</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

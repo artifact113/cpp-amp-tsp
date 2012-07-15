@@ -2,39 +2,56 @@
 #define __TPS_RESULTS_HPP__
 
 #include <vector>
+#include <assert.h>
+
+#include "tsp/adjacency_matrix.hpp"
 
 namespace tsp {
 
 class tour
 {
+
 public:
-    tour(int dimension)
-    {
-        data_.reserve(dimension);
-    }
 
-    int dimension() const 
-    {
-        return data_.size();
-    }
+    // ctor
+    tour(const adjacency_matrix& adjacency_matrix);
 
-    void add_stop(int id)
-    {
-        data_.push_back(id);
-    }
+    // number of stops (+1 for circuit)
+    int size() const;
 
-    int current_location() const
-    {
-        return data_.back();
-    }
+    // insert a stop to the tour
+    void add_stop(int id);
 
-    const int& operator()(int i) const
-    {
-        return data_[i];
-    }
+    // complete the circuit back the start
+    void finalize();
+
+    // checks to see if a full tour has been executed
+    bool isFinal() const;
+
+    // current stop of the tour
+    int current_location() const;
+
+    // real only access
+    const int& operator()(int i) const;
+
+    // total length of tour
+    int length(bool force = false) const;
+
+    // sort by length
+    bool operator<(const tour& rhs);
+
+    // return distance of {n-1, n, n+1} where n is an index
+    int symmetric_distance(int src) const;
+
+    // perform local optimzations (2-opt)
+    void optimize();
 
 private:
+
+    const adjacency_matrix& adjacency_matrix_;
     std::vector<int> data_;    
+    mutable int length_; 
+
 };
 
 } // namespace tsp

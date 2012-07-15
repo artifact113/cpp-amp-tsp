@@ -2,31 +2,48 @@
 
 #include "opencv2/opencv.hpp"
 
+#include "tsp/tour.hpp"
+#include "tsp/colony.hpp"
+#include "tsplib_parser/tsplib_parser.hpp"
+
 namespace viz
 {
+ 
+//
+// Impl
+//
 
 template <typename weight_type>
 struct display<weight_type>::impl
 {
     // ctor
-    impl(const tpslib::tsplib_data<weight_type>& input, int window_size)
+    impl(const tsplib::tsplib_data<weight_type>& input, int window_size)
         : input(input), window_size(window_size)
     {}
 
-    //
-    const tpslib::tsplib_data<weight_type>& input;
+    // copy of input data
+    const tsplib::tsplib_data<weight_type>& input;
 
     // background
     cv::Mat image;
 
-    // 
+    // various sizes
     int window_size;
     float x_scale;
     float y_scale;
+
+    // border around the display window
+    static const int border_size() { return 16; }
+
+    // members
+    cv::Point to_point(const tsplib::coord<weight_type>& c)
+    {
+        return cv::Point(int(c.x*x_scale)+border_size(), int(c.y*y_scale)+border_size());
+    }
 };
 
 template <typename weight_type>
-display<weight_type>::display(const tpslib::tsplib_data<weight_type>& input, int window_size)
+display<weight_type>::display(const tsplib::tsplib_data<weight_type>& input, int window_size)
 {
     // create pimpl
     pimpl = std::unique_ptr<impl>(new impl(input, window_size));
@@ -36,8 +53,8 @@ display<weight_type>::display(const tpslib::tsplib_data<weight_type>& input, int
     int input_width = input.max_x();
     int input_height = input.max_y();
 
-    pimpl->x_scale = float(window_size - border_size*2) / float(input_width);
-    pimpl->y_scale = float(window_size - border_size*2) / float(input_height);
+    pimpl->x_scale = float(window_size - pimpl->border_size()*2) / float(input_width);
+    pimpl->y_scale = float(window_size - pimpl->border_size()*2) / float(input_height);
     
     // initialize image
     pimpl->image = cv::Mat::zeros(window_size, window_size, CV_8UC3);
@@ -56,27 +73,49 @@ void display<weight_type>::draw_nodes()
     // draw nodes
     for (int i = 0; i < pimpl->input.points(); i++)
     {
-        // void circle(Mat& img, Point center, int radius, const Scalar& color, int thickness=1, int lineType=8, int shift=0)
-        tpslib::coord<weight_type> c = pimpl->input(i);
-        cv::circle(pimpl->image, cv::Point(int(c.x*pimpl->x_scale)+border_size, int(c.y*pimpl->y_scale)+border_size), 2, cv::Scalar(0, 0, 255), -1);
+        tsplib::coord<weight_type> c = pimpl->input(i);
+        cv::circle(pimpl->image, pimpl->to_point(c), 5, cv::Scalar(0, 0, 255), -1);
     }
 }
 
 template <typename weight_type>
 void display<weight_type>::draw_tour(const tsp::tour& tour)
 {
-    for (int i = 0; i < tour.dimension(); i++)
+    for (int i = 0; i < tour.size(); i++)
     {
         int src = tour(i);
-        int dst = (i == tour.dimension()-1 ? tour(0) : tour(i+1));
+        int dst = (i == tour.size()-1 ? tour(0) : tour(i+1));
         
-        tpslib::coord<weight_type> c1 = pimpl->input(src);
-        tpslib::coord<weight_type> c2 = pimpl->input(dst);
+        tsplib::coord<weight_type> c1 = pimpl->input(src);
+        tsplib::coord<weight_type> c2 = pimpl->input(dst);
+        cv::line(pimpl->image, pimpl->to_point(c1), pimpl->to_point(c2), cv::Scalar(0, 0, 128), 2);
+    }
+}
 
-        cv::Point pt1(int(c1.x*pimpl->x_scale)+border_size, int(c1.y*pimpl->y_scale)+border_size);
-        cv::Point pt2(int(c2.x*pimpl->x_scale)+border_size, int(c2.y*pimpl->y_scale)+border_size);
+template <typename weight_type>
+void display<weight_type>::draw_trails(const tsp::pheromones& trails)
+{
+    // get max to normalize color values
+    float max = float(trails.max_value());
 
-        cv::line(pimpl->image, pt1, pt2, cv::Scalar(0,0,128), 1);
+    // skip drawing super low levels
+    const float min_level_to_draw = 0.30f;
+
+    for (int src = 0; src < trails.size(); src++)
+    {
+        for (int dst = 0; dst < trails.size(); dst++)
+        {
+            // normalize and draw
+            float level = float(trails(src,dst)) / max;
+            if (level > min_level_to_draw)
+            {
+                int color = 255 - int(128.f * level);
+                int thickness = int(5.f * level);
+                tsplib::coord<weight_type> c1 = pimpl->input(src);
+                tsplib::coord<weight_type> c2 = pimpl->input(dst);
+                cv::line(pimpl->image, pimpl->to_point(c1), pimpl->to_point(c2), cv::Scalar(color, color, color), thickness);
+            }
+        }
     }
 }
 

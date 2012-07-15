@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tsp_test", "tsp_test\tps_te
 		{D849DF4A-1969-414C-85F4-27D4D0A040A3} = {D849DF4A-1969-414C-85F4-27D4D0A040A3}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tpslib_parser", "tsplib_parser\tpslib_parser.vcxproj", "{4F47C283-09DE-452E-9CB5-CB489E60D3A3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tsplib_parser", "tsplib_parser\tpslib_parser.vcxproj", "{4F47C283-09DE-452E-9CB5-CB489E60D3A3}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tsp_visualization", "tsp_visualization\tsp_visualization.vcxproj", "{B6F041F9-B482-4092-8B9B-4B9880F76208}"
 EndProject
@@ -38,5 +38,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

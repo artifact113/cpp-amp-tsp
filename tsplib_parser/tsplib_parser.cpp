@@ -1,14 +1,14 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include "tsplib_parser/tsplib_parser.hpp"
-#include "tsp/adjacency_matrix.hpp"
 
 namespace {
 
 template <typename weight_type> struct valid_edge_weight_type;
 template <> struct valid_edge_weight_type<int>   { static const std::string value() { return "EUC_2D"; }};
-template <> struct valid_edge_weight_type<float> { static const std::string value() { return "GEO";    }};
+template <> struct valid_edge_weight_type<float> { static const std::string value() { return "EUC_2D";    }};
 
 bool parse_string_tag(std::ifstream& ifs, const std::string& tag, const std::string& key, const std::string& line, std::string& value)
 {
@@ -85,7 +85,7 @@ bool parse_coordinates_tag(std::ifstream& ifs, const std::string& tag, const std
 
 } // namespace 
 
-namespace tpslib {
+namespace tsplib {
 
 template <typename weight_type>
 tsplib_data<weight_type>::tsplib_data(const std::string& file_name)
@@ -141,9 +141,9 @@ tsplib_data<weight_type>::tsplib_data(const std::string& file_name)
 }
 
 template <typename weight_type>
-std::unique_ptr<tsp::adjacency_matrix<weight_type>> tsplib_data<weight_type>::generate_adjacency_matrix() const
+std::vector<int> tsplib_data<weight_type>::generate_adjacency_matrix() const
 {
-    auto ret = std::unique_ptr<tsp::adjacency_matrix<weight_type>>(new tsp::adjacency_matrix<weight_type>(dimension_));  
+    std::vector<int> ret(dimension() * dimension(), 0);  
 
     for (const coord_type& src : coordinates_)
     {
@@ -157,11 +157,11 @@ std::unique_ptr<tsp::adjacency_matrix<weight_type>> tsplib_data<weight_type>::ge
                     continue;
 
                 // caclulate symmetric distance
-                weight_type dist = distance(src, dst);
+                int dist = distance(src, dst);
 
                 // symmetric data
-                ret->operator()(src.id, dst.id) = dist;
-                ret->operator()(dst.id, src.id) = dist;
+                ret[src.id * dimension() + dst.id] = dist;
+                ret[dst.id * dimension() + src.id] = dist;
             }
         }
     }
@@ -173,4 +173,4 @@ std::unique_ptr<tsp::adjacency_matrix<weight_type>> tsplib_data<weight_type>::ge
 template class tsplib_data<int>;
 template class tsplib_data<float>;
 
-} // namespace tpslib
+} // namespace tsplib

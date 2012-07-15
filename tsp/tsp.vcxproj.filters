@@ -15,10 +15,16 @@
     <ClInclude Include=".\tour.hpp">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include=".\solve.hpp">
+    <ClInclude Include="config.hpp">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include=".\ant_colony.hpp">
+    <ClInclude Include=".\pheromones.hpp">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include=".\colony.hpp">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include=".\ant.hpp">
       <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -26,7 +32,16 @@
     <ClCompile Include="adjacency_matrix.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include=".\solve.cpp">
+    <ClCompile Include="tour.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include=".\pheromones.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ant.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="colony.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

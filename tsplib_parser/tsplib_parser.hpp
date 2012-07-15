@@ -9,7 +9,7 @@
 
 #include "tsp/adjacency_matrix.hpp"
 
-namespace tpslib {
+namespace tsplib {
 
 /// DESC
 template <typename weight_type>
@@ -22,15 +22,21 @@ struct coord
 
 /// DESC
 template <typename weight_type>
-weight_type distance(const coord<weight_type>& rhs, const coord<weight_type>& lhs)
+int distance(const coord<weight_type>& rhs, const coord<weight_type>& lhs)
 {
-    return weight_type( sqrt( (rhs.x-lhs.x)*(rhs.x-lhs.x) + (rhs.y-lhs.y)*(rhs.y-lhs.y) ) );
+    // Euclidean distance
+    double xd = rhs.x - lhs.x;
+    double yd = rhs.y - lhs.y;
+    double r = sqrt(xd*xd + yd*yd) + 0.5;
+
+    return int(r);
 }
 
 /// DESC
 template <typename weight_type>
 class tsplib_data
 {
+
     typedef typename coord<weight_type> coord_type;
 
 public:
@@ -39,7 +45,7 @@ public:
     tsplib_data(const std::string& file_name);
 
     // generates the an adjacey matrix from the data
-    std::unique_ptr<tsp::adjacency_matrix<weight_type>> generate_adjacency_matrix() const;
+    std::vector<int> generate_adjacency_matrix() const;
 
     // get problem dimension 
     int dimension() const
@@ -79,8 +85,9 @@ private:
     std::string edgeweight_type_;
     std::string displayDataType_;
     std::vector<coord_type> coordinates_;
+
 };
 
-} // namespace tpslib 
+} // namespace tsplib 
 
 #endif // __TSPLIB_PARSER_HPP__
