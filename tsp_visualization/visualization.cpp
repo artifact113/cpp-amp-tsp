@@ -99,7 +99,7 @@ void display<weight_type>::draw_trails(const tsp::pheromones& trails)
     float max = float(trails.max_value());
 
     // skip drawing super low levels
-    const float min_level_to_draw = 0.30f;
+    const float min_level_to_draw = 1.f / trails.size();
 
     for (int src = 0; src < trails.size(); src++)
     {

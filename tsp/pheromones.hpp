@@ -17,7 +17,7 @@ class pheromones
 public:
 
     // ctor
-    pheromones(const adjacency_matrix& adjacency_matrix, float init = pheromone_type(0));
+    pheromones(const adjacency_matrix& adjacency_matrix, float init = pheromone_type(1));
 
     // dimension
     int size() const;
@@ -26,7 +26,7 @@ public:
     const float& operator()(int src, int dst) const;
     
     // update with information from  tour
-    void update(const tour& tour, float weight = pheromone_type(0));
+    void update(const tour& tour, float weight = pheromone_type(1));
 
     // evaporate a percentage from each edge
     void evaporate(float rate);
@@ -38,6 +38,10 @@ private:
 
     int size_;
     std::vector<pheromone_type> mat_;
+
+    // min-max optimization
+    // pheromone_type min_;
+    // pheromone_type max_;
 
 };
 

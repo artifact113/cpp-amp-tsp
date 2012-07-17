@@ -85,7 +85,7 @@ int main()
         std::vector<int> vector_data = data.generate_adjacency_matrix();
 
         // create adjacency_matrix wrapper
-        tsp::adjacency_matrix adj_mat(vector_data, 32);
+        tsp::adjacency_matrix adj_mat(vector_data, 64);
 
         const int ant_count = 50;
         tsp::colony colony(adj_mat, ant_count);
@@ -98,11 +98,14 @@ int main()
         {
             auto i = colony.iterate();
             auto t = colony.best_tour();
+            auto t0 = colony.worst_tour();
             auto l = t.length();
-            std::cout << i << ": " << t.length() << std::endl;
+            std::cout << i << ": " << t.length() << " ... " << t0.length() << std::endl;
 
             gui.clear();
+            //gui.draw_trails(colony.get_pheromones());
             gui.draw_nodes();
+            
             gui.draw_tour(t);
             gui.output_to_window(window_name);
         }

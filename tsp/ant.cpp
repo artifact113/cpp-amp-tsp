@@ -18,16 +18,20 @@ namespace tsp {
 ant::ant(const colony& colony)
     : colony_(colony)
 {
-   
 }
 
 void ant::do_tour()
 {
+    // global colony information
     const adjacency_matrix& adj_mat = colony_.get_adjacency_matrix();
+    const pheromones& pheromones = colony_.get_pheromones();
 
     // create a new tour
     tour this_tour(adj_mat);
 
+    // 
+    std::uniform_real_distribution<float> float_dist(0.f, 1.f);
+    
     // randomize starting point
     std::uniform_int_distribution<int> int_dist(0, adj_mat.size()-1);
     int src = int_dist(rng_engine());
@@ -53,28 +57,35 @@ void ant::do_tour()
         int src = this_tour.current_location();
 
         // calculate sum of all pheromone trails from this location
-        // float pheromone_sum = weight_type();
-        // std::for_each(tabu.begin(), tabu.end(), [&](const int& dst)
-        // {
-        //     if (src != dst)
-        //         pheromone_sum += float(pheromone_trails(src, dst));
-        // });
-        // 
-        // float distance_sum = weight_type();
-        // std::for_each(tabu.begin(), tabu.end(), [&](const int& dst)
-        // {
-        //     if (src != dst)
-        //         distance_sum += (1.f / float(adjacency_matrix(src, dst)));
-        // });
+        float pheromone_sum = float();
+        std::for_each(tabu.begin(), tabu.end(), [&](const int& dst)
+        {
+            if (src != dst)
+                pheromone_sum += float(colony_.get_pheromones()(src, dst));
+        });
+
+        float distance_sum = float();
+        std::for_each(tabu.begin(), tabu.end(), [&](const int& dst)
+        {
+            if (src != dst)
+                distance_sum += (float(1) / float(adj_mat(src, dst)));
+        });
 
         // create probability density function
         std::transform(tabu.begin(), tabu.end(), heuristic_pdf.begin(), [&](const int& dst)
         {
-            float d = (1.f / float(adj_mat(src, dst)));  /// distance_sum;
-            return std::make_pair(dst, d);
-        });
+            float d = (1.f / float(adj_mat(src, dst))) / distance_sum;
+            float p = pheromones(src, dst) / pheromone_sum;
+            float r = float_dist(rng_engine());
 
-        // get min
+            float pdf = std::pow(d, 0.8f) + std::pow(p, 0.2f) + std::pow(r, 0.3f);
+
+            return std::make_pair(dst, pdf);
+        });
+        
+        // TODO: nearest neighbor optimizations
+
+        // get max
         int dst = std::max_element(heuristic_pdf.begin(), heuristic_pdf.end(), [](const heuristic_pair& lhs, const heuristic_pair& rhs)
         {
             return lhs.second < rhs.second;
@@ -87,10 +98,11 @@ void ant::do_tour()
         tabu.remove(dst);
     }
 
-    // complete the tour
-    this_tour.finalize();
+    // make sure we finished with a valid tour
+    assert(this_tour.isFinal());
+    assert(this_tour.isValid());
 
-    // attempt to apply local optimizations
+    // apply local optimizations
     this_tour.optimize();
 
     // better than our best?

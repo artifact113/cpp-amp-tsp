@@ -5,6 +5,16 @@
 #include "adjacency_matrix.hpp"
 #include "tour.hpp"
 
+namespace {
+
+    template <typename T>
+    inline void clamp(T& val, const T& min, const T& max)
+    {
+        val = std::min(std::max(val, min), max);
+    }
+
+}
+
 namespace tsp {
 
 pheromones::pheromones(const adjacency_matrix& adjacency_matrix, pheromone_type init_value)
@@ -25,6 +35,7 @@ const pheromone_type& pheromones::operator()(int src, int dst) const
 void pheromones::update(const tour& tour, pheromone_type weight)
 {
     assert(tour.isFinal());
+    assert(tour.isValid());
 
     pheromone_type tau = weight / tour.length();
 
@@ -33,8 +44,10 @@ void pheromones::update(const tour& tour, pheromone_type weight)
         int src = tour(i);
         int dst = tour(i+1);
 
-        mat_[src*size_ + dst] += tau;
-        mat_[dst*size_ + src] += tau;
+        pheromone_type value = mat_[src*size_ + dst] += tau;
+
+        mat_[src*size_ + dst] = value;
+        mat_[dst*size_ + src] = value;
     }
 }
 

@@ -1,7 +1,5 @@
 #include <algorithm>
-
-// TEMP!
-#include <iostream>
+#include <assert.h>
 
 #include "tour.hpp"
 #include "config.hpp"
@@ -12,7 +10,7 @@ tour::tour(const adjacency_matrix& adjacency_matrix)
     : adjacency_matrix_(adjacency_matrix), length_(0)
 {
     // +1 to complete circuit
-    data_.reserve(adjacency_matrix_.size() + 1);
+    data_.reserve(adjacency_matrix_.size());
 }
 
 int tour::size() const 
@@ -25,12 +23,6 @@ void tour::add_stop(int id)
     data_.push_back(id);
 }
 
-void tour::finalize()
-{
-    assert(data_.size() == size());
-    add_stop(data_.front());
-}
-
 int tour::current_location() const
 {
     return data_.back();
@@ -38,18 +30,33 @@ int tour::current_location() const
 
 const int& tour::operator()(int i) const
 {
-    return data_[i];
+    if (i < 0)
+        return data_.back();
+    else if ( i >= size() )
+        return data_.front();
+    else
+        return data_.at(i);
 }
 
 bool tour::isFinal() const
 {
-    return data_.size() == size() + 1;
+    return data_.size() == size();
+}
+
+bool tour::isValid() const
+{
+    std::vector<int> check = data_;
+    std::sort(check.begin(), check.end());
+    return (check.end() == std::unique(check.begin(), check.end()));
 }
 
 int tour::length(bool force) const
 {
     // make sure we are a complete route
     assert(isFinal());
+    assert(isValid());
+
+    const tour& self = *this;
 
     // if not cached or non-forced
     if (!length_ || force)
@@ -60,8 +67,8 @@ int tour::length(bool force) const
         // first n-1 stops
         for (int i = 0; i < stops; i++)
         {
-            int src = data_[i];
-            int dst = data_[i+1];
+            int src = self(i);
+            int dst = self(i+1);
             length_ += adjacency_matrix_(src, dst);
         }
     }
@@ -76,9 +83,11 @@ bool tour::operator<(const tour& rhs)
 
 int tour::symmetric_distance(int n) const
 {
-    int a = data_[n-1 < 0 ? size()-2 : n-1];
-    int b = data_[n];
-    int c = data_[n+1];
+    const tour& self = *this;
+
+    int a = self(n-1);
+    int b = self(n);
+    int c = self(n+1);
 
     return adjacency_matrix_(a,b) + adjacency_matrix_(b,c);
 }
@@ -98,29 +107,29 @@ void tour::optimize()
     std::random_shuffle(shuffle.begin(), shuffle.end());
 
     // for each starting city...
-    for (const int& src : shuffle)
+    for (const int& n0 : shuffle)
     {
         // get unoptimized destination and distance
-        const int dst = data_[idata[src]+1];
-        int distance = adjacency_matrix_(src, dst);
+        //const int dst = data_[idata[n0]+1];
+        //int distance = adjacency_matrix_(n0, dst);
 
         // for each nearest neighbor
-        for (const int& nn : adjacency_matrix_.nn(src))
+        for (const int& n1 : adjacency_matrix_.nn(n0))
         {
             // nearest neighbor data
-            int nn_distance = adjacency_matrix_(src, nn);
+            //int n1_distance = adjacency_matrix_(n0, n1);
 
-            // if nn is closer... 
-            if (distance > nn_distance)
+            // if n1 is closer... 
+            //if (distance > n1_distance)
             {   
                 // measure before distance of effected nodes
-                int input = symmetric_distance(idata[src]) + symmetric_distance(idata[nn]);
+                int input = symmetric_distance(idata[n0]) + symmetric_distance(idata[n1]);
                     
                 // try swap
-                std::swap( data_[idata[src]], data_[idata[nn]] );
+                std::swap( data_[idata[n0]], data_[idata[n1]] );
 
                 // measure change
-                int output = symmetric_distance(idata[src]) + symmetric_distance(idata[nn]);
+                int output = symmetric_distance(idata[n0]) + symmetric_distance(idata[n1]);
                 int delta = input - output;
 
                 if (delta > 0)
@@ -130,7 +139,7 @@ void tour::optimize()
                 else
                 {
                     // no improvement; swap back
-                    std::swap( data_[idata[src]], data_[idata[nn]] );
+                    std::swap( data_[idata[n0]], data_[idata[n1]] );
                 }
             }
         }

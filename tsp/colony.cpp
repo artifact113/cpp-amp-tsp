@@ -40,33 +40,28 @@ const adjacency_matrix& colony::get_adjacency_matrix() const
     return adjacency_matrix_;
 }
 
+pheromones& colony::get_pheromones()
+{
+    return pheromones_;
+}
+
+const pheromones& colony::get_pheromones() const
+{
+    return pheromones_;
+}
+
 int colony::iterate()
 {   
+    // simulate each ant in parallel
     std::for_each(ants().begin(), ants().end(), std::mem_fn(&ant::do_tour));
 
-    /*
-    std::vector<tour<weight_type>> ant_tours;
+    // each tour generated contributes to the pheromate matrix
+    for (const ant& ant : ants())
+       pheromones_.update(ant.get_local_best_tour());
 
-    // generate ant trails
-    for (int i = 0; i < ant_count_; i++)
-        ant_tours.push_back( ant_.visit(adjacency_matrix_, pheromone_trails_) );
-
-    // update the pheromone trails
-    for (const tour<weight_type>& tour : ant_tours)
-    {
-        pheromone_trails_.update(tour);
-    }
-
-    // evaporate
-    pheromone_trails_.evaporate( float(p()) / 100.f );
-
-    // save best
-    auto it = std::min_element(ant_tours.begin(), ant_tours.end());
-    std::cout << it->length() << std::endl;
-
-    return *it;
-    */
-
+    // evaporate some pheromones
+    pheromones_.evaporate(0.3f);
+    
     return ++iter_;
 }
 
@@ -74,6 +69,16 @@ int colony::iterate()
 const tour& colony::best_tour() const
 {
     auto it = std::min_element(ants().begin(), ants().end(), [](const ant& lhs, const ant& rhs)
+    {
+        return lhs.get_local_best_tour().length() < rhs.get_local_best_tour().length();
+    });
+
+    return it->get_local_best_tour();
+}
+
+const tour& colony::worst_tour() const
+{
+    auto it = std::max_element(ants().begin(), ants().end(), [](const ant& lhs, const ant& rhs)
     {
         return lhs.get_local_best_tour().length() < rhs.get_local_best_tour().length();
     });

@@ -45,13 +45,15 @@ public:
 
     // get the current best tour
     const tour& best_tour() const;
+    const tour& worst_tour() const;
 
     // read only adjacency matrix access
     const adjacency_matrix& get_adjacency_matrix() const;
 
-    // read only pheromones access
+    // pheromones access
+    pheromones& get_pheromones();
     const pheromones& get_pheromones() const;
-
+    
     // gui initialization and access
     const viz::display<int>& gui(const tsplib::tsplib_data<int>& input, int window_size);
         

@@ -22,11 +22,11 @@ public:
     // insert a stop to the tour
     void add_stop(int id);
 
-    // complete the circuit back the start
-    void finalize();
-
     // checks to see if a full tour has been executed
     bool isFinal() const;
+
+    // make sure all elements in the tour are unique
+    bool isValid() const;
 
     // current stop of the tour
     int current_location() const;
