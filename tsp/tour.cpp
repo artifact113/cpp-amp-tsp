@@ -4,6 +4,20 @@
 #include "tour.hpp"
 #include "config.hpp"
 
+namespace {
+
+struct op2
+{
+    op2(int delta = 0, int n1 = 0)
+        : delta(delta), n1(n1)
+    {}
+
+    int delta;
+    int n1;
+};
+
+} // unnamed namesapce 
+
 namespace tsp {
 
 tour::tour(const adjacency_matrix& adjacency_matrix)
@@ -97,34 +111,36 @@ void tour::optimize()
     // tour must be completed to perform any local optimizations
     assert(isFinal());
 
+    // cleaner () operator
+    tour& self = *this;
+
     // inverse positions (e.g. city 7 is stop 12)
     std::vector<int> idata(size());
     for (const int& i : data_)  
         idata[data_[i]] = i;
-
+    
     // get a random ordering of stops
     std::vector<int> shuffle = data_;
     std::random_shuffle(shuffle.begin(), shuffle.end());
 
+    // save best swap
+    op2 best_swap;
+
     // for each starting city...
     for (const int& n0 : shuffle)
     {
-        // get unoptimized destination and distance
-        //const int dst = data_[idata[n0]+1];
-        //int distance = adjacency_matrix_(n0, dst);
+        // reset the neighbor scores for this target
+        best_swap = op2();
 
-        // for each nearest neighbor
+        // for each nearest neighbor...
         for (const int& n1 : adjacency_matrix_.nn(n0))
         {
-            // nearest neighbor data
-            //int n1_distance = adjacency_matrix_(n0, n1);
-
-            // if n1 is closer... 
-            //if (distance > n1_distance)
+            // for each nearest neighbor...
+            for (const int& n2 : adjacency_matrix_.nn(n1))
             {   
                 // measure before distance of effected nodes
-                int input = symmetric_distance(idata[n0]) + symmetric_distance(idata[n1]);
-                    
+                int input = symmetric_distance(idata[n0]) + symmetric_distance(idata[n1]) + symmetric_distance(idata[n2]);
+                  
                 // try swap
                 std::swap( data_[idata[n0]], data_[idata[n1]] );
 
@@ -132,17 +148,18 @@ void tour::optimize()
                 int output = symmetric_distance(idata[n0]) + symmetric_distance(idata[n1]);
                 int delta = input - output;
 
-                if (delta > 0)
-                {
-                    break;
-                }
-                else
-                {
-                    // no improvement; swap back
-                    std::swap( data_[idata[n0]], data_[idata[n1]] );
-                }
+                // record delta
+                if (delta > best_swap.delta)
+                    best_swap = op2(delta, n1);
+
+                // swap back
+                std::swap(data_[idata[n0]], data_[idata[n1]]);
             }
         }
+
+        // act on best swap
+        if (best_swap.delta > 0)
+            std::swap(data_[idata[n0]], data_[idata[best_swap.n1]]);
     }
 }
 
