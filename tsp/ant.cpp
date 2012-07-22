@@ -28,70 +28,98 @@ void ant::do_tour()
 
     // create a new tour
     tour this_tour(adj_mat);
-
-    // 
+   
     std::uniform_real_distribution<float> float_dist(0.f, 1.f);
-    
+
     // randomize starting point
     std::uniform_int_distribution<int> int_dist(0, adj_mat.size()-1);
     int src = int_dist(rng_engine());
     this_tour.add_stop(src);
 
     // inialize valid location list; excluding current location
+    // TODO: this isn't really a tabu lists
     std::list<int> tabu;
     for (int i = 0; i < adj_mat.size(); i++)
         if (i != src)
             tabu.push_back(i);
 
-    // node hueristics
+    // calculate sum of all pheromone trails from this location
+    float pheromone_sum = float();
+    std::for_each(tabu.begin(), tabu.end(), [&](const int& dst)
+    {
+        if (src != dst)
+            pheromone_sum += float(colony_.get_pheromones()(src, dst));
+    });
+
+    float distance_sum = float();
+    std::for_each(tabu.begin(), tabu.end(), [&](const int& dst)
+    {
+        if (src != dst)
+            distance_sum += (float(1) / float(adj_mat(src, dst)));
+    });
+
+    // node hueristics & probability density
     typedef std::pair<int, float> heuristic_pair;
-    std::vector<heuristic_pair> heuristic_pdf;
+    std::vector<heuristic_pair> nn_pdf(adj_mat.nn_count());
 
     // begin tour...
     while (!tabu.empty())
     {
-        // reset huerstic components
-        heuristic_pdf.resize(tabu.size());
-
         // get current location
         int src = this_tour.current_location();
 
-        // calculate sum of all pheromone trails from this location
-        float pheromone_sum = float();
-        std::for_each(tabu.begin(), tabu.end(), [&](const int& dst)
+        // target location
+        int dst = -1;
+
+        // create probability density function of visiting all of our neighbors
+        float p_sum = 0.f;
+        std::transform(adj_mat.nn(src).begin(), adj_mat.nn(src).end(), nn_pdf.begin(), [&](const int& nn)
         {
-            if (src != dst)
-                pheromone_sum += float(colony_.get_pheromones()(src, dst));
+            if (std::find(tabu.begin(), tabu.end(), nn) != tabu.end())
+                std::make_pair(nn, 0); 
+
+            float d = (1.f / float(adj_mat(src, nn))) / distance_sum;
+            float p = pheromones(src, nn) / pheromone_sum;
+
+            // TODO: alpha / beta
+            float pdf = std::pow(d, 0.8f) + std::pow(p, 0.2f);
+            p_sum += p;
+
+            return std::make_pair(nn, pdf);
         });
 
-        float distance_sum = float();
-        std::for_each(tabu.begin(), tabu.end(), [&](const int& dst)
+        if (p_sum)
         {
-            if (src != dst)
-                distance_sum += (float(1) / float(adj_mat(src, dst)));
-        });
+            float rand = float_dist(rng_engine()) * p_sum;
 
-        // create probability density function
-        std::transform(tabu.begin(), tabu.end(), heuristic_pdf.begin(), [&](const int& dst)
-        {
-            float d = (1.f / float(adj_mat(src, dst))) / distance_sum;
-            float p = pheromones(src, dst) / pheromone_sum;
-            float r = float_dist(rng_engine());
+            int i = 0;
+            float p_scan = 0.f;
+            while( p_scan <= rand )
+            {
+                p_scan += nn_pdf[i].second;
+                i++;
+            }
+            i--;
 
-            float pdf = std::pow(d, 0.8f) + std::pow(p, 0.2f) + std::pow(r, 0.3f);
-
-            return std::make_pair(dst, pdf);
-        });
+            int p_dst = nn_pdf[i].first;
+            if ( std::find(tabu.begin(), tabu.end(), p_dst) != tabu.end() )
+                dst = p_dst;
+        }
         
-        // TODO: nearest neighbor optimizations
-
-        // get max
-        int dst = std::max_element(heuristic_pdf.begin(), heuristic_pdf.end(), [](const heuristic_pair& lhs, const heuristic_pair& rhs)
+        if (dst == -1)
         {
-            return lhs.second < rhs.second;
-        })->first;
+            // all nearest neighbors have been visisted; choose closest
+
+            auto it = std::min_element(tabu.begin(), tabu.end(), [&](const int& rhs, const int& lhs)
+            {
+                return adj_mat(src,rhs) < adj_mat(src,lhs);
+            });
+
+            dst = *it;
+        }
             
         // add to our tour
+        assert(dst != -1);
         this_tour.add_stop(dst);
 
         // remove stop from the valid list
